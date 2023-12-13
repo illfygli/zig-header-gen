@@ -13,8 +13,7 @@ pub const C_Generator = struct {
     const Self = @This();
 
     pub fn init(comptime src_file: []const u8, dst_dir: *Dir) Self {
-
-        var file = dst_dir.createFile(comptime filebase(src_file) ++ ".h", .{}) catch
+        const file = dst_dir.createFile(comptime filebase(src_file) ++ ".h", .{}) catch
             @panic("Failed to create header file for source: " ++ src_file);
 
         var res = Self{ .file = file };
@@ -48,7 +47,7 @@ pub const C_Generator = struct {
         self.writeType(meta.return_type.?);
         self.write(" " ++ name ++ "(");
 
-        inline for (meta.params) |arg, i| {
+        inline for (meta.params, 0..) |arg, i| {
             self.writeType(arg.type.?);
             //TODO: Figure out how to get arg names; for now just do arg0..argN
             _ = self.file.writer().print(" arg{}", .{i}) catch unreachable;
@@ -93,7 +92,7 @@ pub const C_Generator = struct {
         self.write("enum " ++ name ++ " {\n");
 
         comptime var last = 0;
-        inline for (meta.fields) |field, i| {
+        inline for (meta.fields, 0..) |field, i| {
             self.write("    " ++ field.name);
 
             // if field value is unexpected/custom, manually define it

@@ -76,7 +76,7 @@ pub fn DepsGraph(comptime T: type) type {
         pub const BeginSymbolError = error{ DuplicateSymbol, OutOfMemory };
 
         pub fn beginSymbol(self: *Self, name: []const u8, payload: T) BeginSymbolError!void {
-            var result = try self.symbols.getOrPut(name);
+            const result = try self.symbols.getOrPut(name);
 
             if (result.found_existing) {
                 return error.DuplicateSymbol;
@@ -148,7 +148,7 @@ pub fn DepsGraph(comptime T: type) type {
         pub const EndSymbolError = error{OutOfMemory};
 
         pub fn createNode(comptime V: type, data: V, allocator: Allocator) !*TailQueue(V).Node {
-            var node = try allocator.create(TailQueue(V).Node);
+            const node = try allocator.create(TailQueue(V).Node);
             node.* = .{ .data = data };
             return node;
         }
@@ -199,9 +199,9 @@ pub fn DepsGraph(comptime T: type) type {
         }
 
         pub fn readEmitted(self: *Self) ?EmittedSymbol {
-            var symbol_node = self.emitted.popFirst() orelse return null;
+            const symbol_node = self.emitted.popFirst() orelse return null;
 
-            var symbol = symbol_node.data;
+            const symbol = symbol_node.data;
 
             self.allocator.destroy(symbol_node);
 
@@ -277,7 +277,7 @@ pub fn DepsGraph(comptime T: type) type {
                 _ = dependency_name;
                 var maybe_dep_index: ?usize = null;
 
-                for (self.dependencies.items) |dependency, i| {
+                for (self.dependencies.items, 0..) |dependency, i| {
                     if (dependency.eqlName(dependency)) {
                         maybe_dep_index = i;
                         break;
@@ -430,7 +430,7 @@ test "Blocked symbols iterator" {
     try expect(deps.readEmitted() == null);
 
     var iter = deps.blockedIterator();
-    var symbol = iter.next();
+    const symbol = iter.next();
 
     try expect(symbol != null);
     try expectEqualStrings(symbol.?.name, "TextPosition");

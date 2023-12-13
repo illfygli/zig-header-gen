@@ -47,11 +47,9 @@ fn getTypeName(comptime T: type) []const u8 {
     };
 }
 
-pub const SymbolPhase = enum {
-    Signature, Body, Full
-};
+pub const SymbolPhase = enum { Signature, Body, Full };
 
-pub fn Ordered_Generator(comptime Generator: type) type {
+pub fn OrderedGenerator(comptime Generator: type) type {
     return struct {
         inner_gen: Generator,
         allocator: Allocator,
@@ -61,7 +59,7 @@ pub fn Ordered_Generator(comptime Generator: type) type {
         const Self = @This();
 
         pub fn init(comptime src_file: []const u8, dst_dir: *Dir) Self {
-            var allocator = std.heap.page_allocator;
+            const allocator = std.heap.page_allocator;
 
             return Self{
                 .inner_gen = Generator.init(src_file, dst_dir),
@@ -75,14 +73,14 @@ pub fn Ordered_Generator(comptime Generator: type) type {
             self.flush();
 
             self.symbols.deinit();
-            
+
             self.inner_gen.deinit();
 
             self.emitted_phase.deinit();
         }
 
         fn getNextPhaseFor(self: *Self, symbol_name: []const u8, partial: bool) !?SymbolPhase {
-            var result = try self.emitted_phase.getOrPut(symbol_name);
+            const result = try self.emitted_phase.getOrPut(symbol_name);
 
             if (!result.found_existing) {
                 result.value_ptr.* = if (partial) .Signature else .Full;
@@ -106,7 +104,7 @@ pub fn Ordered_Generator(comptime Generator: type) type {
                 const partial = if (emitted.symbol.payload == .Fn) false else emitted.partial;
                 _ = partial;
 
-                var phase = self.getNextPhaseFor(emitted.symbol.name, emitted.partial) catch unreachable orelse continue;
+                const phase = self.getNextPhaseFor(emitted.symbol.name, emitted.partial) catch unreachable orelse continue;
 
                 switch (emitted.symbol.payload) {
                     .Struct => |meta| self.inner_gen.gen_struct(emitted.symbol.name, meta, phase),

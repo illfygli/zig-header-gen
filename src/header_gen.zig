@@ -7,7 +7,7 @@ const warn = std.debug.print;
 // Provided generators
 pub const C_Generator = @import("generators/c.zig").C_Generator;
 pub const Python_Generator = @import("generators/python.zig").Python_Generator;
-pub const Ordered_Generator = @import("generators/ordered.zig").Ordered_Generator;
+pub const Ordered_Generator = @import("generators/ordered.zig").OrderedGenerator;
 
 const GeneratorInterface = struct {
     fn init() void {}
@@ -50,7 +50,7 @@ fn validateGenerator(comptime Generator: type) void {
 }
 
 pub fn HeaderGen(comptime S: type, comptime libname: []const u8) type {
-    comptime var all_decls: []const Declaration = @typeInfo(S).Struct.decls;
+    const all_decls: []const Declaration = @typeInfo(S).Struct.decls;
 
     return struct {
         decls: @TypeOf(all_decls) = all_decls,

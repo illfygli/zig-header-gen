@@ -35,7 +35,7 @@ const LookMaAnEnum = enum(c_int) {
     five = 5,
 };
 
-pub fn main () void {
+pub fn main() void {
     comptime var gen = header_gen.HeaderGen(@This(), "lib").init();
 
     gen.exec(header_gen.C_Generator);

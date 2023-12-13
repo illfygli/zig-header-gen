@@ -17,7 +17,7 @@ pub const Python_Generator = struct {
     const Self = @This();
 
     pub fn init(comptime src_file: []const u8, dst_dir: *Dir) Self {
-        var file = dst_dir.createFile(comptime filebase(src_file) ++ ".py", .{}) catch
+        const file = dst_dir.createFile(comptime filebase(src_file) ++ ".py", .{}) catch
             @panic("Failed to create header file for source: " ++ src_file);
 
         var res = Self{ .file = file };
@@ -45,7 +45,7 @@ pub const Python_Generator = struct {
     pub fn gen_func(self: *Self, name: []const u8, meta: FnMeta) void {
         self.print("lib.{s}.argtypes = [", .{name});
 
-        for (meta.params) |arg, i| {
+        for (meta.params, 0..) |arg, i| {
             if (arg.type) |t| {
                 self.writeType(t.*);
             } else {
@@ -77,7 +77,7 @@ pub const Python_Generator = struct {
             self.write("\t_fields_ = [");
         }
 
-        for (fields) |field, i| {
+        for (fields, 0..) |field, i| {
             if (i > 0) {
                 self.write(prefix);
             }
@@ -192,7 +192,7 @@ pub const Python_Generator = struct {
         var was_lower: bool = false;
         var is_upper: bool = undefined;
 
-        for (str) |char, i| {
+        for (str, 0..) |char, i| {
             is_upper = std.ascii.isUpper(char);
 
             if (char == '_' and i > 0) {
